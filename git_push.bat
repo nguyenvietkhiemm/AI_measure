@@ -5,7 +5,7 @@ pip freeze > requirements.txt
 echo Checking for uncommitted changes...
 git status
 
-rem
+rem Kiểm tra có thay đổi chưa
 if not "%ERRORLEVEL%" == "0" (
     echo No changes to commit.
     pause
@@ -13,6 +13,14 @@ if not "%ERRORLEVEL%" == "0" (
 )
 
 git add .
+
+rem
+set datetime=%DATE% %TIME%
+set datetime=%datetime: =_%
+
+git commit -m "fix_%datetime%"
+
+git push
 
 echo Preparing to push changes...
 pause
