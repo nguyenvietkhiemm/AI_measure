@@ -9,10 +9,12 @@ from config import input_columns, output_columns
 import pandas as pd
 from sklearn.model_selection import train_test_split    
 
-# convert xlsx to csv
-# check_and_convert_to_csv(r"D:\Test\AI_measure\src\data\raw\dataset_measure.xlsx", r"D:\Test\AI_measure\src\data\processed\dataset_measure.csv")
+from pathlib import Path
 
-df = pd.read_csv(r"D:\Test\AI_measure\src\data\processed\dataset_measure.csv")
+# convert xlsx to csv
+check_and_convert_to_csv(Path(r"data\raw\dataset_measure.xlsx").resolve(), Path(r"data\raw\dataset_measure.csv").resolve())
+
+df = pd.read_csv(Path(r"data\raw\dataset_measure.csv").resolve())
 
 # convert to number
 df = df.apply(pd.to_numeric, errors='coerce') 
@@ -23,6 +25,9 @@ df = df.round(1)
 # eliminate outlier data
 for column in df.columns:
     df = remove_outliers_iqr(df, column) 
+
+# save data
+df.to_csv(Path(r"data\processed\dataset_measure.csv").resolve(), index=False)
 
 # normalize dataframe
 df = min_max_scale(df)
@@ -49,4 +54,4 @@ print("R2: ", r2)
 
 # save model
 
-save_model(model, r"D:\Test\AI_measure\src\models\linear_model.pkl")
+save_model(model, Path(r"models\linear_model.pkl").resolve())

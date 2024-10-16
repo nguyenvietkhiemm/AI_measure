@@ -12,7 +12,7 @@ echo DEACTIVATED
 echo Checking for uncommitted changes...
 git status
 
-rem Kiểm tra có thay đổi chưa
+rem
 if not "%ERRORLEVEL%" == "0" (
     echo No changes to commit.
     pause
