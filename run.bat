@@ -9,6 +9,9 @@ echo System is running...
 cd src
 python index.py
 
+jupyter notebooks/exploration.ipynb
+jupyter notebooks/analysis.ipynb
+
 rem 
 cd ..
 call venv\Scripts\deactivate.bat

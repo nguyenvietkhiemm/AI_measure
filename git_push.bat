@@ -31,4 +31,3 @@ git push
 
 echo Preparing to push changes...
 pause
-exit
