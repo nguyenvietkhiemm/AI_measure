@@ -1,6 +1,13 @@
 @echo off
 echo Extracting requirements...
+
+call venv\Scripts\activate.bat
+echo ACTIVATED
+
 pip freeze > requirements.txt
+
+call venv\Scripts\deactivate.bat
+echo DEACTIVATED
 
 echo Checking for uncommitted changes...
 git status
