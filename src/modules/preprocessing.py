@@ -20,4 +20,4 @@ def remove_outliers_iqr(df, column):
 def min_max_scale(df):
     min_max_scaler = MinMaxScaler(feature_range=(0, 1))
     df_min_max_scaled = pd.DataFrame(min_max_scaler.fit_transform(df), columns=df.columns)
-    return df_min_max_scaled
+    return df_min_max_scaled, min_max_scaler

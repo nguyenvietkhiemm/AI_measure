@@ -30,7 +30,7 @@ for column in df.columns:
 df.to_csv(Path(r"data\processed\dataset_measure.csv").resolve(), index=False)
 
 # normalize dataframe
-df = min_max_scale(df)
+df, min_max_scaler = min_max_scale(df)
 
 #split data
 X = df[input_columns]
@@ -52,6 +52,16 @@ print("MSE: ", mse)
 print("RMSE: ", rmse)
 print("R2: ", r2)
 
-# save model
+# save dataframe
+test = pd.DataFrame(min_max_scaler.inverse_transform(pd.concat([pd.DataFrame(X_test), pd.DataFrame(y_test)], axis=1)))
+pred = pd.DataFrame(min_max_scaler.inverse_transform(
+    pd.concat([pd.DataFrame(X_test).reset_index(drop=True), pd.DataFrame(y_pred).reset_index(drop=True)], axis=1)
+))
+metrics = pd.DataFrame({"MAE": [mae], "MSE": [mse], "RMSE": [rmse], "R2": [r2]})
 
+test.to_csv(Path(r"results\dataframe\test.csv").resolve(), index=False)
+pred.to_csv(Path(r"results\dataframe\pred.csv").resolve(), index=False)
+metrics.to_csv(Path(r"results\metrics\metric.csv").resolve(), index=False)
+
+# save model
 save_model(model, Path(r"models\linear_model.pkl").resolve())
