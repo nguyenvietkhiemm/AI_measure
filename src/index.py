@@ -3,8 +3,9 @@ from modules.preprocessing import replace_error_value, remove_outliers_iqr, min_
 from modules.training import model_linear_regression
 from modules.evaluation import evaluate
 from modules.save import save_model, load_model
+from modules.extract_js import extract_js
 
-from config import input_columns, output_columns
+from config import input_columns, output_columns, json_model_path
 
 import pandas as pd
 from sklearn.model_selection import train_test_split    
@@ -65,3 +66,6 @@ metrics.to_csv(Path(r"results\metrics\metric.csv").resolve(), index=False)
 
 # save model
 save_model(model, Path(r"models\linear_model.pkl").resolve())
+
+#extract json
+extract_js(json_model_path, model, min_max_scaler)
