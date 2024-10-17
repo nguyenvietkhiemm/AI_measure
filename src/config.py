@@ -5,4 +5,4 @@ output_columns = ['shoulder', 'sleeve',
        'armhole', 'front_vest', 'back_length', 'crotch', 'pants_length',
        'thight', 'lower_thight', 'calves', 'leg_opening_width']
 
-json_model_path = r"D:\Test\AI_measure\model"
+json_model_path = r"C:\Users\Admin\Desktop"
