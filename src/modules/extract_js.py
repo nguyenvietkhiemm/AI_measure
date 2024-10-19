@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-def extract_js(json_model_path, model, min_max_scaler):
+def extract_js(json_model_path, original_js_path ,model, min_max_scaler):
     # Lấy các trọng số (coefficients) và bias (intercept)
     coefficients = model.coef_
     intercept = model.intercept_
@@ -17,7 +17,7 @@ def extract_js(json_model_path, model, min_max_scaler):
     }
 
         # Đọc nội dung của file gốc index.js
-    with open(Path(r"js/index.js"), 'r', encoding='utf-8') as file:
+    with open(original_js_path, 'r', encoding='utf-8') as file: 
         original_js_content = file.read()
     
     model_params_json = "const data = " + json.dumps(model_params, indent=4) + ";\n"
@@ -27,7 +27,7 @@ def extract_js(json_model_path, model, min_max_scaler):
     with open("{}\Linear_Model.js".format(json_model_path), 'w', encoding='utf-8') as json_file:
         json_file.write(new_js_content)
 
-    print("Saved the model into {}\Linear_Model.json".format(json_model_path))
+    print("[IMPORTANT!] Saved the model into {}\Linear_Model.json".format(json_model_path))
     
 
 
