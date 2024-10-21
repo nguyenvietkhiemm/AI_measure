@@ -5,10 +5,9 @@ from modules.preprocessing import replace_error_value, remove_outliers_iqr, min_
 from modules.Models import LinearRegressionModel, LightGBMModel
 from modules.evaluation import evaluate
 from modules.save import save_model, load_model
-from modules.extract_js import extract_js
 from modules.run_notebooks import run_notebooks
 
-from config import input_columns, output_columns, json_model_path
+from config import input_columns, output_columns, js_model_path
 
 import pandas as pd
 from sklearn.model_selection import train_test_split    
@@ -28,17 +27,18 @@ def main():
     notebooks_path = os.path.join(ROOT_DIR, "notebooks", "analysis.ipynb")
 
     # convert xlsx to csv
-    # check_and_convert_to_csv(dataset_xlsx, dataset_csv)
+    check_and_convert_to_csv(dataset_xlsx, dataset_csv)
     
     # check_csv
     check_csv(dataset_csv)
 
     df = pd.read_csv(dataset_csv)
+    
+    df = df[input_columns + output_columns]
 
     # convert to number
     df = df.apply(pd.to_numeric, errors='coerce') 
-    # df = df.apply(lambda col: replace_error_value(col, ["gender", "form"]))
-    df = df.apply(lambda col: replace_error_value(col, ["Gender"]))
+    df = df.apply(lambda col: replace_error_value(col, ["gender", "form"]))
     df.fillna(df.mean(), inplace=True)
     df = df.round(1)
 
@@ -61,48 +61,56 @@ def main():
     # train
     # model = LightGBMModel()
     model = LinearRegressionModel()
+    model.train_all_combinations(X_train, y_train, input_columns, output_columns)
     
-    model.train(X_train, y_train)
-    # model = model_lightgbm(X_train, y_train)
-
-    # predict
-    y_pred = model.predict(X_test)
-    
-    # recover
+    # test dataframe
     test = pd.concat([pd.DataFrame(X_test), pd.DataFrame(y_test)], axis=1)
-    pred = pd.concat([pd.DataFrame(X_test).reset_index(drop=True), pd.DataFrame(y_pred).reset_index(drop=True)], axis=1)
-    
-    # recover X_test and y_test (inverse transform)
-    test = pd.DataFrame(min_max_scaler.inverse_transform(np.concatenate([X_test, y_test], axis=1)),
-                                columns=input_columns + output_columns)
-
-    pred = pd.DataFrame(min_max_scaler.inverse_transform(np.concatenate([X_test, y_pred], axis=1)),
-                                columns=input_columns + output_columns)
+    test_inverse = pd.DataFrame(min_max_scaler.inverse_transform(test), 
+                            columns=input_columns + output_columns)
 
     # evaluate
-    mae, mse, rmse, r2 = evaluate(test[output_columns], pred[output_columns])
-    
-    cases_number = len(test)
+    metrics = pd.DataFrame({"Input": [], "Output":[], "MAE": [], "MSE": [], "RMSE": [], "R2": []})
+    current_input_columns = input_columns.copy()
+    for output_column in output_columns[:-1]:
+        current_input_columns.append(output_column)
+        # predict
+        print("================================================================================================")
+        y_pred = model.predict(test[current_input_columns])
+        current_output_columns = [col for col in output_columns if col not in current_input_columns]
+        
+        pred = pd.concat([pd.DataFrame(test[current_input_columns]).reset_index(drop=True), pd.DataFrame(y_pred).reset_index(drop=True)], axis=1)
+        pred_inverse = pd.DataFrame(min_max_scaler.inverse_transform(pred),
+                            columns=current_input_columns + current_output_columns)
 
-    print("\nSai số trung bình cho {} trường hợp: ".format(cases_number), mae, "\n")
-    print("MAE: ", mae)
-    print("MSE: ", mse)
-    print("RMSE: ", rmse)
-    print("R2: ", r2)
+        mae, mse, rmse, r2 = evaluate(test_inverse[current_output_columns], pred_inverse[current_output_columns])
 
+        print("Average error for {} cases of inputs: {} ==> outputs: {}".format(len(test), current_input_columns, current_output_columns))
+        print("MAE: ", mae)
+        print("MSE: ", mse)
+        print("RMSE: ", rmse)
+        print("R2: ", r2)
+        print("================================================================================================\n\n")
+        
+            # Thêm dữ liệu vào DataFrame metrics
+        metrics = metrics._append({
+            "Input": ", ".join(current_input_columns),
+            "Output": ", ".join(current_output_columns),
+            "MAE": mae,
+            "MSE": mse,
+            "RMSE": rmse,
+            "R2": r2
+        }, ignore_index=True)
+        
     # save dataframe
-
-    metrics = pd.DataFrame({"MAE": [mae], "MSE": [mse], "RMSE": [rmse], "R2": [r2]})
-
-    test.to_csv(test_csv, index=False)
+    test_inverse.to_csv(test_csv, index=False)
     pred.to_csv(pred_csv, index=False)
     metrics.to_csv(metrics_csv, index=False)
 
     # save model
-    save_model(model.get_model(), model_path)
+    save_model(model.get_models(), model_path)
 
     #extract json
-    extract_js(json_model_path, index_js, model.get_model(), min_max_scaler)
+    model.extract_js(js_model_path, index_js, min_max_scaler)
     
     #run notebooks
     run_notebooks(notebooks_path)

@@ -1,47 +1,58 @@
 class Linear_Model {
     constructor() {
-        const { weights, biases, min_vals, max_vals } = data;
-        this.weights = weights;
-        this.biases = biases;
-        this.min_vals = min_vals;
-        this.max_vals = max_vals;
+        this.models = models;
+        const { min, max } = min_max_vals;
+        this.min_vals = min;
+        this.max_vals = max;
+        this.input_columns = input_columns;
+        this.output_columns = output_columns;
+        this.all_columns = input_columns.concat(output_columns);
     }
-
-    // Hàm chuẩn hóa giá trị đầu vào
     normalize(input, min_vals, max_vals) {
         return input.map((value, i) => (value - min_vals[i]) / (max_vals[i] - min_vals[i]));
     }
-
-    // Hàm đưa giá trị từ chuẩn hóa về gốc
     denormalize(normalizedInput, min_vals, max_vals) {
         return normalizedInput.map((value, i) => value * (max_vals[i] - min_vals[i]) + min_vals[i]);
     }
+    findModelIndex(inputDict) {
+        const binaryString = this.output_columns.map(col => (inputDict.hasOwnProperty(col) ? '1' : '0')).join('');
+        return parseInt(binaryString, 2);
+    }
+    predict(inputDict) {
+        const inputKeys = Object.keys(inputDict);
+        const outputKeys = this.output_columns.filter(col => !inputKeys.includes(col));
+        const input = inputKeys.map(key => inputDict[key]);
+        console.log("INPUT", input);
+        const modelIndex = this.findModelIndex(inputDict);
+        const weights = this.models[modelIndex].w;
+        const biases = this.models[modelIndex].b;
 
-    // Hàm dự đoán giá trị đầu ra
-    predict(input) {
-        // Chia min_vals và max_vals thành cho đầu vào và đầu ra
-        const min_vals_input = this.min_vals.slice(0, input.length);
-        const max_vals_input = this.max_vals.slice(0, input.length);
-        const min_vals_output = this.min_vals.slice(input.length);
-        const max_vals_output = this.max_vals.slice(input.length);
+        const min_vals_input = inputKeys.map(col => this.min_vals[this.all_columns.indexOf(col)]);
+        const max_vals_input = inputKeys.map(col => this.max_vals[this.all_columns.indexOf(col)]);
+        const min_vals_output = outputKeys.map(col => this.min_vals[this.all_columns.indexOf(col)]);
+        const max_vals_output = outputKeys.map(col => this.max_vals[this.all_columns.indexOf(col)]);
 
-        // Chuẩn hóa đầu vào
-        input = this.normalize(input, min_vals_input, max_vals_input);
-    
-        let results = new Array(this.weights.length).fill(0);
-    
+        console.log(min_vals_input);
+        console.log(max_vals_input);
+        console.log(outputKeys);
+
+        const normalizedInput = this.normalize(input, min_vals_input, max_vals_input);
+        let results = new Array(weights.length).fill(0);
         for (let i = 0; i < results.length; i++) {
-            results[i] = this.biases[i];
-            for (let j = 0; j < input.length; j++) {
-                results[i] += input[j] * this.weights[i][j];
+            results[i] = biases[i];
+            for (let j = 0; j < normalizedInput.length; j++) {
+                results[i] += normalizedInput[j] * weights[i][j];
             }
         }
-
-        // Chuẩn hóa ngược để đưa ra kết quả cuối cùng
         results = this.denormalize(results, min_vals_output, max_vals_output);
         results = results.map(result => parseFloat(result.toFixed(1)));
-        return results;
+        const outputDict = {};
+
+        for (let i = 0; i < outputKeys.length; i++) {
+            outputDict[outputKeys[i]] = results[i];
+        }
+
+        return outputDict;
     }
 }
-
 export default Linear_Model;

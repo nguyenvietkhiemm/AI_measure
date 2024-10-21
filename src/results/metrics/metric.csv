@@ -1,2 +1,12 @@
-MAE,MSE,RMSE,R2
-4.716546481374835,40.020360469388486,6.326164751995358,0.6553946773112431
+Input,Output,MAE,MSE,RMSE,R2
+"height, weight, gender, age, form, shoulder","sleeve, neck, chest, waist, stomach, hip, front_jacket, biceps, armhole, front_vest, back_length",6.850357720998887,99.06548665604649,9.953164655326791,0.8947859487050838
+"height, weight, gender, age, form, shoulder, sleeve","neck, chest, waist, stomach, hip, front_jacket, biceps, armhole, front_vest, back_length",7.428383310769564,108.73844331076826,10.42777269174814,0.8928121648727927
+"height, weight, gender, age, form, shoulder, sleeve, neck","chest, waist, stomach, hip, front_jacket, biceps, armhole, front_vest, back_length",8.16940141568857,120.6758288637675,10.985255065940322,0.8780106839993833
+"height, weight, gender, age, form, shoulder, sleeve, neck, chest","waist, stomach, hip, front_jacket, biceps, armhole, front_vest, back_length",8.91924919225565,134.6861138640117,11.605434669326767,0.8722979566083326
+"height, weight, gender, age, form, shoulder, sleeve, neck, chest, waist","stomach, hip, front_jacket, biceps, armhole, front_vest, back_length",7.860615237106127,104.19560005682702,10.207624604031391,0.909715859707198
+"height, weight, gender, age, form, shoulder, sleeve, neck, chest, waist, stomach","hip, front_jacket, biceps, armhole, front_vest, back_length",7.205722334233199,89.58748253609794,9.465066430622551,0.9282788795331471
+"height, weight, gender, age, form, shoulder, sleeve, neck, chest, waist, stomach, hip","front_jacket, biceps, armhole, front_vest, back_length",6.695735648357609,79.60221015998253,8.92200707015986,0.9342811904593633
+"height, weight, gender, age, form, shoulder, sleeve, neck, chest, waist, stomach, hip, front_jacket","biceps, armhole, front_vest, back_length",5.885200030605242,64.14081754616636,8.008796260747701,0.9365290255605525
+"height, weight, gender, age, form, shoulder, sleeve, neck, chest, waist, stomach, hip, front_jacket, biceps","armhole, front_vest, back_length",6.198433160562912,71.1908847463042,8.43746909602069,0.9390822081109336
+"height, weight, gender, age, form, shoulder, sleeve, neck, chest, waist, stomach, hip, front_jacket, biceps, armhole","front_vest, back_length",8.533512260968143,105.48502220794408,10.270590158697994,0.8421052958765156
+"height, weight, gender, age, form, shoulder, sleeve, neck, chest, waist, stomach, hip, front_jacket, biceps, armhole, front_vest",back_length,7.48890571323957,83.18275865612796,9.120458248143454,0.258769761615781
