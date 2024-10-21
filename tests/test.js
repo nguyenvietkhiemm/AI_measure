@@ -1,20 +1,23 @@
 import Linear_Model from "./Linear_Model.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("inputForm");
     const linear_model = new Linear_Model();
+    const inputs = document.querySelectorAll("#inputForm input, #inputForm select");
 
-    form.addEventListener("keyup", function (event) {
-        event.preventDefault(); // Ngăn chặn reload trang khi submit form
+    inputs.forEach(input => {
+        input.addEventListener("keyup", handleEvent);
+        input.addEventListener("change", handleEvent);
+    });
 
-        // Lấy giá trị từ form
+    function handleEvent(event) {
+        event.preventDefault();
+
         const height = parseFloat(document.getElementById("height").value);
         const weight = parseFloat(document.getElementById("weight").value);
         const gender = parseInt(document.getElementById("gender").value);
         const age = parseInt(document.getElementById("age").value);
         const formValue = parseInt(document.getElementById("form").value);
 
-        // Kiểm tra xem các input khác có giá trị hay không
         const shoulder = document.getElementById("shoulder").value ? parseFloat(document.getElementById("shoulder").value) : null;
         const sleeve = document.getElementById("sleeve").value ? parseFloat(document.getElementById("sleeve").value) : null;
         const neck = document.getElementById("neck").value ? parseFloat(document.getElementById("neck").value) : null;
@@ -28,7 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const front_vest = document.getElementById("front_vest").value ? parseFloat(document.getElementById("front_vest").value) : null;
         const back_length = document.getElementById("back_length").value ? parseFloat(document.getElementById("back_length").value) : null;
 
-        // Tạo đối tượng đầu vào cho model với chỉ các giá trị hợp lệ
         const inputData = {
             height: height,
             weight: weight,
@@ -50,10 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (front_vest !== null) inputData.front_vest = front_vest;
         if (back_length !== null) inputData.back_length = back_length;
 
-        // Gọi model để dự đoán kết quả
         const res = linear_model.predict(inputData);
 
-        // Hiển thị kết quả dự đoán vào placeholder của các trường input
         document.getElementById("shoulder").placeholder = res.shoulder || "";
         document.getElementById("sleeve").placeholder = res.sleeve || "";
         document.getElementById("neck").placeholder = res.neck || "";
@@ -66,5 +66,5 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("armhole").placeholder = res.armhole || "";
         document.getElementById("front_vest").placeholder = res.front_vest || "";
         document.getElementById("back_length").placeholder = res.back_length || "";
-    });
+    }
 });
