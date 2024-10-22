@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from modules.manipulation import check_and_convert_to_csv, check_csv
-from modules.preprocessing import replace_error_value, remove_outliers_iqr, min_max_scale
+from modules.preprocessing import replace_error_value_by_nan, remove_outliers_iqr, min_max_scale, label_encode, fill_missing_data_by_knn
 from modules.Models import LinearRegressionModel, LightGBMModel
 from modules.evaluation import evaluate
 from modules.save import save_model, load_model
@@ -17,7 +17,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 def main():
     # PATH
     dataset_xlsx = os.path.join(ROOT_DIR, "data", "raw", "dataset_measure.xlsx")
-    dataset_csv = os.path.join(ROOT_DIR, "data", "raw", "dataset_measure.csv")
+    dataset_csv = os.path.join(ROOT_DIR, "data", "raw", "dataset_measure - test1.csv")
     processed_csv = os.path.join(ROOT_DIR, "data", "processed", "dataset_measure.csv")
     test_csv = os.path.join(ROOT_DIR, "results", "dataframe", "test.csv")
     pred_csv = os.path.join(ROOT_DIR, "results", "dataframe", "pred.csv")
@@ -27,20 +27,20 @@ def main():
     notebooks_path = os.path.join(ROOT_DIR, "notebooks", "analysis.ipynb")
 
     # convert xlsx to csv
-    check_and_convert_to_csv(dataset_xlsx, dataset_csv)
+    # check_and_convert_to_csv(dataset_xlsx, dataset_csv)
     
     # check_csv
     check_csv(dataset_csv)
 
+    # get dataframe
     df = pd.read_csv(dataset_csv)
-    
     df = df[input_columns + output_columns]
-
+    
     # convert to number
-    df = df.apply(pd.to_numeric, errors='coerce') 
-    df = df.apply(lambda col: replace_error_value(col, ["gender", "form"]))
-    df.fillna(df.mean(), inplace=True)
-    df = df.round(1)
+    df = label_encode(df, "form")
+    df = df.replace(',', '.', regex=True).astype(float).round(1)
+    df = df.apply(lambda col: replace_error_value_by_nan(col, except_columns=["gender", "form"]))
+    df = fill_missing_data_by_knn(df, input_columns=["height", "weight"], columns=["shoulder", "sleeve", "neck", "chest"])
 
     # eliminate outlier data
     for column in df.columns:
