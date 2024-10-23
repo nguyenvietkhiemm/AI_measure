@@ -21,7 +21,7 @@ def main():
     dataset_csv = os.path.join(ROOT_DIR, "data", "raw", "dataset_measure - test1.csv")
     processed_csv = os.path.join(ROOT_DIR, "data", "processed", "dataset_measure.csv")
     test_csv = os.path.join(ROOT_DIR, "results", "dataframe", "test.csv")
-    pred_csv = os.path.join(ROOT_DIR, "results", "dataframe", "pred.csv")
+    pred_path = os.path.join(ROOT_DIR, "results", "dataframe", "pred")
     metrics_csv = os.path.join(ROOT_DIR, "results", "metrics", "metric.csv")
     model_path = os.path.join(ROOT_DIR, "models", "linear_model.pkl")
     index_js = os.path.join(ROOT_DIR, "js", "index.js")
@@ -80,7 +80,7 @@ def main():
     # evaluate
     metrics = pd.DataFrame({"Input": [], "Output":[], "MAE": [], "MSE": [], "RMSE": [], "R2": []})
     current_input_columns = input_columns.copy()
-    for output_column in output_columns[:-1]:
+    for i, output_column in enumerate(output_columns[:-1]):
         current_input_columns.append(output_column)
         # predict
         print("================================================================================================")
@@ -90,6 +90,9 @@ def main():
         pred = pd.concat([pd.DataFrame(test[current_input_columns]).reset_index(drop=True), pd.DataFrame(y_pred).reset_index(drop=True)], axis=1)
         pred_inverse = pd.DataFrame(min_max_scaler.inverse_transform(pred),
                             columns=current_input_columns + current_output_columns)
+        
+        pred_inverse_csv = os.path.join(pred_path, "pred_{}.csv".format(i))
+        pred_inverse.to_csv(pred_inverse_csv, index=False)
 
         mae, mse, rmse, r2 = evaluate(test_inverse[current_output_columns], pred_inverse[current_output_columns])
 
@@ -112,7 +115,6 @@ def main():
         
     # save dataframe
     test_inverse.to_csv(test_csv, index=False)
-    pred.to_csv(pred_csv, index=False)
     metrics.to_csv(metrics_csv, index=False)
 
     # save model
