@@ -6,6 +6,7 @@ from modules.Models import LinearRegressionModel, LightGBMModel
 from modules.evaluation import evaluate
 from modules.save import save_model, load_model
 from modules.run_notebooks import run_notebooks
+from modules.examples import create_data
 
 from config import input_columns, output_columns, js_model_path
 
@@ -35,12 +36,20 @@ def main():
     # get dataframe
     df = pd.read_csv(dataset_csv)
     df = df[input_columns + output_columns]
-    
+
     # convert to number
-    df = label_encode(df, "form")
-    df = df.replace(',', '.', regex=True).astype(float).round(1)
+    numeric_columns = df.columns.drop(["form", "gender"], errors='ignore')
+    df[numeric_columns] = df[numeric_columns].replace(',', '.', regex=True).astype(float).round(1)
+    
+    # fill missing data
     df = df.apply(lambda col: replace_error_value_by_nan(col, except_columns=["gender", "form"]))
     df = fill_missing_data_by_knn(df, input_columns=["height", "weight"], columns=["shoulder", "sleeve", "neck", "chest"])
+    
+    # create data
+    df = create_data(df)
+    print(df)
+    print(df["form"].unique())
+    df = label_encode(df, "form")
 
     # eliminate outlier data
     for column in df.columns:
