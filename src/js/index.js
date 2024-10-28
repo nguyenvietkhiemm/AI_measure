@@ -8,6 +8,28 @@ class Linear_Model {
         this.output_columns = output_columns;
         this.all_columns = input_columns.concat(output_columns);
     }
+    encodeInput(inputDict) {
+        const encodedInput = { ...inputDict };
+        for (const [column, values] of Object.entries(columns_encoder)) {
+            if (encodedInput.hasOwnProperty(column)) {
+                const valueIndex = values.indexOf(encodedInput[column]);
+                if (valueIndex !== -1) {
+                    encodedInput[column] = valueIndex;
+                }
+            }
+        }
+        return encodedInput;
+    }
+    decodeOutput(outputDict) {
+        const decodedOutput = { ...outputDict };
+        for (const [column, values] of Object.entries(columns_encoder)) {
+            if (decodedOutput.hasOwnProperty(column)) {
+                const index = decodedOutput[column];
+                decodedOutput[column] = values[index];
+            }
+        }
+        return decodedOutput;
+    }
     normalize(input, min_vals, max_vals) {
         return input.map((value, i) => (value - min_vals[i]) / (max_vals[i] - min_vals[i]));
     }
@@ -19,40 +41,45 @@ class Linear_Model {
         return parseInt(binaryString, 2);
     }
     predict(inputDict) {
-        const inputKeys = Object.keys(inputDict);
-        const outputKeys = this.output_columns.filter(col => !inputKeys.includes(col));
-        const input = inputKeys.map(key => inputDict[key]);
-        console.log("INPUT", input);
-        const modelIndex = this.findModelIndex(inputDict);
+        inputDict = Object.keys(inputDict)
+        .filter(key => this.input_columns.includes(key) && inputDict[key] !== "" && (typeof inputDict[key] === 'number' || (typeof inputDict[key] === 'string' && inputDict[key].trim() !== "")))
+        .reduce((obj, key) => {
+            obj[key] = inputDict[key];
+            return obj;
+        }, {});
+
+        console.log(JSON.stringify(inputDict));
+        const inputKeys = Object.keys(inputDict);            
+
+        const encodedInputDict = this.encodeInput(inputDict);
+        const input = this.input_columns.map(col => encodedInputDict[col]);
+        const outputKeys = this.output_columns.filter(col => !Object.keys(inputDict).includes(col));
+        
+        const modelIndex = this.findModelIndex(encodedInputDict);
         const weights = this.models[modelIndex].w;
         const biases = this.models[modelIndex].b;
 
-        const min_vals_input = inputKeys.map(col => this.min_vals[this.all_columns.indexOf(col)]);
-        const max_vals_input = inputKeys.map(col => this.max_vals[this.all_columns.indexOf(col)]);
+        const min_vals_input = this.input_columns.map(col => this.min_vals[this.all_columns.indexOf(col)]);
+        const max_vals_input = this.input_columns.map(col => this.max_vals[this.all_columns.indexOf(col)]);
         const min_vals_output = outputKeys.map(col => this.min_vals[this.all_columns.indexOf(col)]);
         const max_vals_output = outputKeys.map(col => this.max_vals[this.all_columns.indexOf(col)]);
 
-        console.log(min_vals_input);
-        console.log(max_vals_input);
-        console.log(outputKeys);
-
         const normalizedInput = this.normalize(input, min_vals_input, max_vals_input);
-        let results = new Array(weights.length).fill(0);
-        for (let i = 0; i < results.length; i++) {
-            results[i] = biases[i];
+        let output = new Array(weights.length).fill(0);
+        for (let i = 0; i < output.length; i++) {
+            output[i] = biases[i];
             for (let j = 0; j < normalizedInput.length; j++) {
-                results[i] += normalizedInput[j] * weights[i][j];
+                output[i] += normalizedInput[j] * weights[i][j];
             }
         }
-        results = this.denormalize(results, min_vals_output, max_vals_output);
-        results = results.map(result => parseFloat(result.toFixed(1)));
+        output = this.denormalize(output, min_vals_output, max_vals_output);
+        output = output.map(result => parseFloat(result.toFixed(1)));
+        
         const outputDict = {};
-
         for (let i = 0; i < outputKeys.length; i++) {
-            outputDict[outputKeys[i]] = results[i];
+            outputDict[outputKeys[i]] = output[i];
         }
-
-        return outputDict;
+        return this.decodeOutput(outputDict);
     }
 }
 export default Linear_Model;

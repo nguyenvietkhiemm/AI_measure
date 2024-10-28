@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Input Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Input Form</h2>
+        <form id="inputForm">
+            <div class="form-group">
+                <label for="height">Height (cm):</label>
+                <input type="number" id="height" name="height" required>
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight (kg):</label>
+                <input type="number" id="weight" name="weight" required>
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option value="1">Nam</option>
+                    <option value="2">Nữ</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" required>
+            </div>
+            <div class="form-group">
+                <label for="form">Body shape</label>
+                <select id="form" name="form" required>
+                    <option value="" selected>Select form</option>
+                    <option value="Rectangle">Rectangle</option>
+                    <option value="Inverted_Triangle">Inverted Triangle</option>
+                    <option value="Trapezoid">Trapezoid</option>
+                    <option value="Round">Round</option>
+                    <option value="Triangle">Triangle</option>
+                </select>
+            </div>
+            <h3>Suggestions:</h3>
+            <div class="results-grid">
+                <div class="form-group">
+                    <label for="shoulder">Shoulder (Rộng vai)</label>
+                    <input type="text" id="shoulder" name="shoulder">
+                </div>
+                <div class="form-group">
+                    <label for="sleeve">Sleeve (Dài tay)</label>
+                    <input type="text" id="sleeve" name="sleeve">
+                </div>
+                <div class="form-group">
+                    <label for="long_sleeve">Long Sleeve (Dài ?)</label>
+                    <input type="text" id="long_sleeve" name="long_sleeve">
+                </div>
+                <div class="form-group">
+                    <label for="neck">Neck (Cổ)</label>
+                    <input type="text" id="neck" name="neck">
+                </div>
+                <div class="form-group">
+                    <label for="chest">Chest (Ngực)</label>
+                    <input type="text" id="chest" name="chest">
+                </div>
+                <div class="form-group">
+                    <label for="waist">Waist (Eo)</label>
+                    <input type="text" id="waist" name="waist">
+                </div>
+                <div class="form-group">
+                    <label for="stomach">Stomach (Bụng)</label>
+                    <input type="text" id="stomach" name="stomach">
+                </div>
+                <div class="form-group">
+                    <label for="hip">Hip (Mông)</label>
+                    <input type="text" id="hip" name="hip">
+                </div>
+                <div class="form-group">
+                    <label for="biceps">Biceps (Bắp tay)</label>
+                    <input type="text" id="biceps" name="biceps">
+                </div>
+                <div class="form-group">
+                    <label for="armhole">Armhole (Nách)</label>
+                    <input type="text" id="armhole" name="armhole">
+                </div>
+                <div class="form-group">
+                    <label for="pants_length">Pants length (Dài quần)</label>
+                    <input type="text" id="pants_length" name="pants_length">
+                </div>
+                <div class="form-group">
+                    <label for="thight">Thight (Đùi)</label>
+                    <input type="text" id="thight" name="thight">
+                </div>
+                <div class="form-group">
+                    <label for="crotch">Crotch (Đáy)</label>
+                    <input type="text" id="crotch" name="crotch">
+                </div>
+            </div>
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+
+    <script src = "view.js" type = "module">
+
+    </script>
+</body>
+</html>

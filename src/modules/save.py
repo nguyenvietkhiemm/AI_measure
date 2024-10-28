@@ -1,8 +1,11 @@
 import joblib
+import pickle
 
 def save_model(models, path):
-    joblib.dump(models, path)
+    with open(path, "wb") as file:
+        pickle.dump(models, file)
 
 def load_model(path):
-    loaded_model = joblib.load(path)
+    with open(path, "rb") as file:
+        loaded_model = pickle.load(file)
     return loaded_model

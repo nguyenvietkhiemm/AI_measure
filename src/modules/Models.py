@@ -7,11 +7,13 @@ import lightgbm as lgb
 import pandas as pd
 import numpy as np
 import json
+from datetime import datetime
 
 
 class LinearRegressionModel:
-    def __init__(self):
+    def __init__(self, name):
         self.models = []
+        self.name = name
 
     def train_all_combinations(self, X_train, y_train, input_columns, output_columns):
         self.input_columns = input_columns
@@ -64,7 +66,7 @@ class LinearRegressionModel:
     def get_models(self):
         return self.models
 
-    def extract_js(self, js_model_path, original_js_path, min_max_scaler):
+    def extract_js(self, js_model_path, original_js_path, min_max_scaler, columns_encoder):
         # Đọc nội dung của file gốc index.js
         try:
             with open(original_js_path, 'r', encoding='utf-8') as file:
@@ -75,10 +77,15 @@ class LinearRegressionModel:
         except Exception as e:
             print(f"An error occurred while reading {original_js_path}: {e}")
             return
-
+        
+            # Thêm thời gian hiện tại
+        update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp_js = f"// Last updated: {update_time}\n\n"
+        
         models_data = []
         min_max_vals = {'min': min_max_scaler.data_min_.astype(np.float32).tolist(),
                         'max': min_max_scaler.data_max_.astype(np.float32).tolist()}
+        columns_encoder = columns_encoder
 
         for model in self.models:
             coefficients = model.coef_
@@ -94,13 +101,14 @@ class LinearRegressionModel:
 
         model_params_json = "const models = " + json.dumps(models_data, separators=(',', ':')) + ";\n"
         min_max_vals_json = "const min_max_vals = " + json.dumps(min_max_vals, separators=(',', ':')) + ";\n"
+        columns_encoder_json = "const columns_encoder = " + json.dumps(columns_encoder, separators=(',', ':')) + ";\n"
         input_columns_json = "const input_columns = " +json.dumps(self.input_columns, separators=(',', ':')) + ";\n"
         output_columns_json = "const output_columns = " +json.dumps(self.output_columns, separators=(',', ':')) + ";\n"
-
-        new_js_content = model_params_json + min_max_vals_json + input_columns_json + output_columns_json + original_js_content 
-
+        
+        new_js_content = timestamp_js + model_params_json + min_max_vals_json + columns_encoder_json + input_columns_json + output_columns_json + original_js_content
+        
         try:
-            with open("{}\Linear_Model.js".format(js_model_path), 'w', encoding='utf-8') as json_file:
+            with open("{}\Linear_Model_{}.js".format(js_model_path, self.name), 'w', encoding='utf-8') as json_file:
                 json_file.write(new_js_content)
         except Exception as e:
             print(

@@ -14,10 +14,10 @@ def check_and_convert_to_csv(file_path, processed_file_path):
 def check_csv(file_path):
     try:
         df = pd.read_csv(file_path)
+        df.columns = df.columns.str.strip().str.lower()
+        df.to_csv(file_path, index=False, sep=',', decimal='.')
     except Exception as e:
         print(f"Lỗi khi đọc tệp CSV: {e}")
         return    
-    df.columns = df.columns.str.strip()
-    df.to_csv(file_path, index=False, sep=',', decimal='.')
-    
+
     print("Checked {}".format(file_path))

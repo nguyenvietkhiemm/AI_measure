@@ -26,15 +26,14 @@ def min_max_scale(df):
 def label_encode(df, column):
     label_encoder = LabelEncoder()
     df[column] = label_encoder.fit_transform(df[column])
-    return df
+    return df, label_encoder
 
 def fill_missing_data_by_knn(df, input_columns, columns, n_neighbors=10):
     for column in columns:
         _columns = input_columns + [column]
         df_missing = df[df[column].isna()][_columns]
         df_valid = df[df[column].notna()][_columns]
-        if df_valid.empty:
-            print(f"Không có dữ liệu hợp lệ để huấn luyện cho cột {column}.")
+        if df_valid.empty or df_missing.empty:
             continue
         knn = KNeighborsRegressor(n_neighbors)
         knn.fit(df_valid[input_columns], df_valid[column])
