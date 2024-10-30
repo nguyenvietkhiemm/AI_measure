@@ -83,8 +83,9 @@ class LinearRegressionModel:
         timestamp_js = f"// Last updated: {update_time}\n\n"
         
         models_data = []
-        min_max_vals = {'min': min_max_scaler.data_min_.astype(np.float32).tolist(),
-                        'max': min_max_scaler.data_max_.astype(np.float32).tolist()}
+        min_max_vals = {'min_vals': min_max_scaler.data_min_.astype(np.float32).tolist(),
+                        'max_vals': min_max_scaler.data_max_.astype(np.float32).tolist()}
+        (min, max) = min_max_scaler.feature_range
         columns_encoder = columns_encoder
 
         for model in self.models:
@@ -99,13 +100,15 @@ class LinearRegressionModel:
                 'b': biases,
             })
 
+        min_json = "const min = " + json.dumps(min, separators=(',', ':')) + ";\n"
+        max_json = "const max = " + json.dumps(max, separators=(',', ':')) + ";\n"
         model_params_json = "const models = " + json.dumps(models_data, separators=(',', ':')) + ";\n"
         min_max_vals_json = "const min_max_vals = " + json.dumps(min_max_vals, separators=(',', ':')) + ";\n"
         columns_encoder_json = "const columns_encoder = " + json.dumps(columns_encoder, separators=(',', ':')) + ";\n"
         input_columns_json = "const input_columns = " +json.dumps(self.input_columns, separators=(',', ':')) + ";\n"
         output_columns_json = "const output_columns = " +json.dumps(self.output_columns, separators=(',', ':')) + ";\n"
         
-        new_js_content = timestamp_js + model_params_json + min_max_vals_json + columns_encoder_json + input_columns_json + output_columns_json + original_js_content
+        new_js_content = timestamp_js + model_params_json + min_max_vals_json + min_json + max_json + columns_encoder_json + input_columns_json + output_columns_json + original_js_content
         
         try:
             with open("{}\Linear_Model_{}.js".format(js_model_path, self.name), 'w', encoding='utf-8') as json_file:

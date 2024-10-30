@@ -21,6 +21,19 @@ PARENT_ROOT_DIR = os.path.dirname(ROOT_DIR)
 
 load_dotenv()
 
+numeric_columns = list(set(input_columns + output_columns) - set(discrete_columns))
+discrete_columns = [col for col in discrete_columns if col not in split_column]
+
+# def sqr_df(df, numeric_columns):
+#     for column in list(numeric_columns):
+#         df[column] = df[column] ** 2
+#     return df
+
+# def sqrt_df(df, numeric_columns):
+#     for column in list(numeric_columns):
+#         df[column] = np.sqrt(df[column])
+#     return df
+
 def preprocessing(dataset_csv, save_csv=None):
     try:
         save_csv = save_csv or dataset_csv
@@ -34,16 +47,19 @@ def preprocessing(dataset_csv, save_csv=None):
         df = df.apply(lambda col: replace_error_value_by_nan(col, except_columns=discrete_columns))
         df = df.dropna(thresh=int(df.shape[1] * 0.5))
         df = fill_missing_data_by_knn(df, input_columns=input_columns, columns=output_columns)
+        print("HAHA", discrete_columns)
         for column in discrete_columns:
             df, label_encoder = label_encode(df, column)
             columns_encoder.update({column: list(label_encoder.classes_)})
         for column in df.columns:
-            df = remove_outliers_iqr(df, column)
+            df = remove_outliers_iqr(df, column)   
         df.to_csv(save_csv, index=False)
         
         return df, columns_encoder
     except Exception as e:
         print(f"Error occurred while processing: {dataset_csv} {e}")
+        
+
         
 def split_data(df, split_column, save_dir):
     if split_column not in df.columns:
@@ -138,6 +154,7 @@ def main():
 
         # normalize dataframe
         normalized_df, min_max_scaler = min_max_scale(df)
+        print(normalized_df)
 
         # split data
         X = normalized_df[input_columns]
@@ -145,9 +162,6 @@ def main():
 
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.1, random_state=42)
-        
-        model = None
-        running_notebooks = True
 
         # model = LightGBMModel()
         model = LinearRegressionModel(name=name)
@@ -160,6 +174,7 @@ def main():
         test = pd.concat([pd.DataFrame(X_test), pd.DataFrame(y_test)], axis=1)
         test_inverse = pd.DataFrame(min_max_scaler.inverse_transform(test),
                                     columns=input_columns + output_columns)
+        # test_inverse = test
 
         # evaluate
         metrics = pd.DataFrame(
@@ -176,8 +191,11 @@ def main():
 
             pred = pd.concat([pd.DataFrame(test[current_input_columns]).reset_index(
                 drop=True), pd.DataFrame(y_pred).reset_index(drop=True)], axis=1)
+            pred.columns = current_input_columns + current_output_columns
+            
             pred_inverse = pd.DataFrame(min_max_scaler.inverse_transform(pred),
                                         columns=current_input_columns + current_output_columns)
+            
 
             pred_inverse_csv = os.path.join(pred_path, "pred_{}.csv".format(i))
             pred_inverse.to_csv(pred_inverse_csv, index=False)
@@ -202,7 +220,7 @@ def main():
                 "RMSE": rmse,
                 "R2": r2
             }, ignore_index=True)
-
+        
         # save dataframe
         test_inverse.to_csv(test_csv, index=False)
         metrics.to_csv(metrics_csv, index=False)

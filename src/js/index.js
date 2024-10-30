@@ -1,9 +1,11 @@
 class Linear_Model {
     constructor() {
         this.models = models;
-        const { min, max } = min_max_vals;
-        this.min_vals = min;
-        this.max_vals = max;
+        const { min_vals, max_vals } = min_max_vals;
+        this.min_vals = min_vals;
+        this.max_vals = max_vals;
+        this.min = min;
+        this.max = max;
         this.input_columns = input_columns;
         this.output_columns = output_columns;
         this.all_columns = input_columns.concat(output_columns);
@@ -31,10 +33,11 @@ class Linear_Model {
         return decodedOutput;
     }
     normalize(input, min_vals, max_vals) {
-        return input.map((value, i) => (value - min_vals[i]) / (max_vals[i] - min_vals[i]));
+        return input.map((value, i) => ((value - min_vals[i]) / (max_vals[i] - min_vals[i])) * (max - min) + min);
     }
+    
     denormalize(normalizedInput, min_vals, max_vals) {
-        return normalizedInput.map((value, i) => value * (max_vals[i] - min_vals[i]) + min_vals[i]);
+        return normalizedInput.map((value, i) => value * (max_vals[i] - min_vals[i]) / (max - min) + min_vals[i]);
     }
     findModelIndex(inputDict) {
         const binaryString = this.output_columns.map(col => (inputDict.hasOwnProperty(col) ? '1' : '0')).join('');
