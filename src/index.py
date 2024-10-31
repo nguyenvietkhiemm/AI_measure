@@ -24,42 +24,36 @@ load_dotenv()
 numeric_columns = list(set(input_columns + output_columns) - set(discrete_columns))
 discrete_columns = [col for col in discrete_columns if col not in split_column]
 
-# def sqr_df(df, numeric_columns):
-#     for column in list(numeric_columns):
-#         df[column] = df[column] ** 2
-#     return df
-
-# def sqrt_df(df, numeric_columns):
-#     for column in list(numeric_columns):
-#         df[column] = np.sqrt(df[column])
-#     return df
-
 def preprocessing(dataset_csv, save_csv=None):
+    global input_columns, output_columns, discrete_columns
     try:
         save_csv = save_csv or dataset_csv
         columns_encoder = {}
         check_csv(dataset_csv)
         df = pd.read_csv(dataset_csv)
         df = df[input_columns + output_columns]
-        for column in list(df.columns):
-            if column not in discrete_columns:
-                df[column] = df[column].str.replace(",", ".").apply(pd.to_numeric, errors='coerce')
+        for column in list(numeric_columns):
+            df[column] = df[column].str.replace(",", ".").apply(pd.to_numeric, errors='coerce')
         df = df.apply(lambda col: replace_error_value_by_nan(col, except_columns=discrete_columns))
         df = df.dropna(thresh=int(df.shape[1] * 0.5))
         df = fill_missing_data_by_knn(df, input_columns=input_columns, columns=output_columns)
-        print("HAHA", discrete_columns)
-        for column in discrete_columns:
-            df, label_encoder = label_encode(df, column)
-            columns_encoder.update({column: list(label_encoder.classes_)})
-        for column in df.columns:
+
+        for discrete_column in discrete_columns:
+            df = pd.get_dummies(df, columns=[discrete_column]).astype(int)
+            input_columns = [col for col in input_columns if col != discrete_column]
+            one_hot_columns = [col for col in df.columns if col.startswith(discrete_column + "_")]
+            input_columns += one_hot_columns
+            columns_encoder[discrete_column] = one_hot_columns
+        df = df.reindex(columns=input_columns + output_columns)
+        
+        for column in list(numeric_columns):
             df = remove_outliers_iqr(df, column)   
+        
         df.to_csv(save_csv, index=False)
         
         return df, columns_encoder
     except Exception as e:
         print(f"Error occurred while processing: {dataset_csv} {e}")
-        
-
         
 def split_data(df, split_column, save_dir):
     if split_column not in df.columns:
@@ -151,10 +145,10 @@ def main():
         dataset_path = os.path.join(processed_dir, dataset_file)
         name = dataset_file.split(".")[0]
         df, columns_encoder = preprocessing(dataset_path)
-
+        # print(df)
+        # return
         # normalize dataframe
         normalized_df, min_max_scaler = min_max_scale(df)
-        print(normalized_df)
 
         # split data
         X = normalized_df[input_columns]
@@ -224,7 +218,7 @@ def main():
         # save dataframe
         test_inverse.to_csv(test_csv, index=False)
         metrics.to_csv(metrics_csv, index=False)
-
+        
         # extract json
         model.extract_js(js_model_path, index_js, min_max_scaler, columns_encoder)
 

@@ -40,8 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
             form: formValue,
         };
 
-        console.log("INPUT: " + JSON.stringify(inputData));
-
         if (shoulder !== null) inputData.shoulder = shoulder;
         if (sleeve !== null) inputData.sleeve = sleeve;
         if (long_sleeve !== null) inputData.long_sleeve = long_sleeve;
@@ -55,7 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (armhole !== null) inputData.armhole = armhole;
         if (thight !== null) inputData.thight = thight;
         if (crotch !== null) inputData.crotch = crotch;
-
+        
+        console.log("INPUT: " + JSON.stringify(inputData));
 
         const res = linear_model.predict(inputData);
 
