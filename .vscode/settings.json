@@ -1,0 +1,9 @@
+{
+    "python.defaultInterpreterPath": "venv/Scripts/python.exe", // Đường dẫn Python trong venv (Windows)
+    "python.terminal.activateEnvironment": true, // Tự động kích hoạt venv trong terminal
+    "code-runner.executorMap": {
+        "python": "venv/Scripts/python.exe $fullFileName" // Chạy file bằng Python trong venv
+    },
+    "code-runner.runInTerminal": true, // Chạy trong terminal tích hợp
+    "code-runner.clearPreviousOutput": true // Xóa output cũ
+}

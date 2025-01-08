@@ -24,6 +24,7 @@ load_dotenv()
 numeric_columns = list(set(input_columns + output_columns) - set(discrete_columns))
 discrete_columns = [col for col in discrete_columns if col not in split_column]
 
+
 def preprocessing(dataset_csv, save_csv=None):
     global input_columns, output_columns, discrete_columns
     try:
@@ -55,6 +56,7 @@ def preprocessing(dataset_csv, save_csv=None):
     except Exception as e:
         print(f"Error occurred while processing: {dataset_csv} {e}")
         
+        
 def split_data(df, split_column, save_dir):
     if split_column not in df.columns:
         print(f"Df has no split column: {split_column}")
@@ -65,6 +67,7 @@ def split_data(df, split_column, save_dir):
     for value, df in split_dfs.items():
         df.drop(split_column, axis=1).to_csv(os.path.join(save_dir, "{}_{}.csv").format(split_column, value), index=False)
         
+        
 def clear_files(dir):
     for filename in os.listdir(dir):
         file_path = os.path.join(dir, filename)
@@ -73,6 +76,7 @@ def clear_files(dir):
                 os.remove(file_path)
         except Exception as e:
             print(f"Error deleting file {file_path}: {e}")
+
 
 def main():
     # PATH
@@ -127,7 +131,7 @@ def main():
         if unique_columns:
             print("\nXUẤT HIỆN CÁC CỘT KHÔNG CÙNG FORMAT VỚI CÁC DATASET KHÁC: ", unique_columns, "\n")
     
-    # MERGER DATA
+    # MERGE DATA
     if df:
         df = pd.concat(df, ignore_index=True)
         df.to_csv(merged_dataset_csv, index=False)
@@ -145,8 +149,7 @@ def main():
         dataset_path = os.path.join(processed_dir, dataset_file)
         name = dataset_file.split(".")[0]
         df, columns_encoder = preprocessing(dataset_path)
-        # print(df)
-        # return
+
         # normalize dataframe
         normalized_df, min_max_scaler = min_max_scale(df)
 
